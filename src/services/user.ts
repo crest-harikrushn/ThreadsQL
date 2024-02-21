@@ -2,7 +2,7 @@ import { createHmac, randomBytes } from "crypto";
 import JWT from "jsonwebtoken";
 import { prismaClient } from "../lib/db";
 
-const JWT_SECRET = "supersecret";
+const JWT_SECRET = "some_secret_key";
 
 export interface CreateUserPayload {
   firstName: string;
@@ -36,7 +36,7 @@ class UserService {
     return createHmac("sha256", salt).update(password).digest("hex");
   }
 
-  private static async getUserByEmail(email: string) {
+  public static async getUserByEmail(email: string) {
     return await prismaClient.user.findUnique({ where: { email } });
   }
 
@@ -58,6 +58,11 @@ class UserService {
     const token = JWT.sign({ id: user.id, email: user.email }, JWT_SECRET);
 
     return token;
+  }
+
+  public static decodeJWTToken(token: string) {
+    const decoded = JWT.decode(token);
+    return decoded;
   }
 }
 

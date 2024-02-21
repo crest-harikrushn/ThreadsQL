@@ -1,6 +1,7 @@
 import express from "express";
 import createApolloGraphqlServer from "./graphql";
 import { expressMiddleware } from "@apollo/server/express4";
+import UserService from "./services/user";
 
 const app = express();
 const port = process.env.PORT || 8000;
@@ -15,7 +16,22 @@ async function init() {
     res.json({ message: `server up and running` });
   });
 
-  app.use("/graphql", expressMiddleware(await createApolloGraphqlServer()));
+  app.use(
+    "/graphql",
+    expressMiddleware(await createApolloGraphqlServer(), {
+      context: async ({ req }) => {
+        const token = req.headers["authorization"];
+
+        try {
+          const user = UserService.decodeJWTToken(token as string);
+
+          return { user };
+        } catch (error) {
+          return {};
+        }
+      },
+    })
+  );
 
   app.listen(port, () => {
     console.log(`server running at port ${port}`);

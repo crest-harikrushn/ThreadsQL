@@ -9,6 +9,17 @@ const queries = {
     const token = await UserService.getUserToken({ email, password });
     return token;
   },
+
+  getCurrentLoggedInUser: async (_: any, parameters: any, context: any) => {
+    if (context && context.user) {
+      const id = context.user.id;
+      const user = UserService.getUserByEmail(context.user.email as string);
+      return user;
+    }
+    return { id: 123 };
+
+    // throw new Error("Unknown!!");
+  },
 };
 
 const mutations = {
